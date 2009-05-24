@@ -13,11 +13,11 @@ Net::Plurk::Dumper - Dump plurks
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 =head1 SYNOPSIS
 
@@ -87,6 +87,24 @@ sub new {
 
 =head2 LIST_REF = $self->fetch_plurks
 
+    LIST_REF contains HASH_REF
+
+        'plurk_type' => 2,
+        'lang' => 'tr_ch',
+        'content' => 
+        'plurk_id' => 53031904,
+        'responses_seen' => 0,
+        'no_comments' => 0,
+        'limited_to' => undef,
+        'content_raw' => 
+        'response_count' => 11,
+        'qualifier' => 'says',
+        'posted' => 'Sat, 23 May 2009 01:58:09 GMT',
+        'is_unread' => 0,
+        'user_id' => 3158365,
+        'owner_id' => 3158365,
+        'id' => 53031904
+
 =cut
 
 sub fetch_plurks {
@@ -145,12 +163,14 @@ sub fetch_plurk_responses {
         $js_ret = from_json( $js_str , { utf8 => 1 });
     });
 
+    eval  {
     my $rc = $self->js->eval( qq!
         @{[ $self->json_code  ]}
         var json = $c;
         var str = JSON.stringify( json );
         set_var( str );
     !);
+    };
 
     return $js_ret;
 }
@@ -173,12 +193,14 @@ sub _fetch_plurks {
 sub _eval_json {
     my ( $self, $js_code, $varname, $accessor_name ) = @_;
     my $json_code = $self->json_code;
+    eval {
     my $rc = $self->js->eval( qq!
         $json_code
         $js_code
         var str = JSON.stringify( $varname );
         set_accessor( "$accessor_name" ,  str );
     !);
+    };
 }
 
 sub _fetch_settings {
